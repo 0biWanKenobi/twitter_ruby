@@ -1,0 +1,12 @@
+<h1>Accounts</h1>
+
+<ul>
+  <% @accounts.each do |account| %>
+    <li>Nome: <%= product.name %></li>
+    <li>Followers: <%= product.followers %></li>
+    <li>Following: <%= product.following %></li>
+  <% end %>
+</ul>
+
+<%= link_to "Nuovo account", accounts_new_path %>
+

@@ -37,3 +37,10 @@ gem 'sdoc', '~> 0.4.0',          group: :doc
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem 'tzinfo-data', platforms: [:mingw, :mswin]
+
+
+# Windows doesn't like coffee script 1.9, so use an older version
+gem 'coffee-script-source', '1.8.0'
+
+# Twitter gem
+gem 'twitter', '5.15.0'
