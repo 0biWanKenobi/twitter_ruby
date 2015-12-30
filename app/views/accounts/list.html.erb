@@ -1,10 +1,11 @@
 <h1>Accounts</h1>
-
+<p id="notice"><%= notice %></p>
 <ul>
   <% @accounts.each do |account| %>
-    <li>Nome: <%= product.name %></li>
-    <li>Followers: <%= product.followers %></li>
-    <li>Following: <%= product.following %></li>
+    <li>Nome: <%= account.name %></li>
+    <li>Followers: <%= account.followers %></li>
+    <li>Following: <%= account.following %></li>
+    <hr>
   <% end %>
 </ul>
 

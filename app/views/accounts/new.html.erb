@@ -1,12 +1,3 @@
 <h1>New product</h1>
-<%
-
-client = Twitter::REST::Client.new do |config|
-  	config.consumer_key        = "bw6Ibw6DvDWZYTZJDgsIn12II"
-    config.consumer_secret     = "lShJQA17tg93RVUCNhHRqAuHOOfSPvYqAJHihKbxT753GukKuJ"
-    config.access_token        = "4644992487-ZGV2FSbwYDCBgVyjMoAaoR3rXlUdnAwaCl9SYVE"
-    config.access_token_secret = "zbU5FfiibtontJiykO3ZInO4yzUDscByi9HjkOAGKy64G"
- end %>
-<% data =  client.get '1.1/users/show.json', {:screen_name=>'twitterdev'} %>
-<%= data[:followers_count].to_s+' '+data[:friends_count].to_s %>
+<p id="notice"><%= notice %></p>
 <%= render 'form' %>
