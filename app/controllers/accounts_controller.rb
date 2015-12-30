@@ -19,6 +19,8 @@ class AccountsController < ApplicationController
     respond_to do |format|
       if @account.save
         format.html { redirect_to root_url, notice: 'account '+params[:account][:name]+' added, has '+params[:account][:followers].to_s+' followers and follows '+params[:account][:following].to_s+' people'}
+      else
+        format.html { render :new }
       end
     #@account = Account.new(account_params)
     end
