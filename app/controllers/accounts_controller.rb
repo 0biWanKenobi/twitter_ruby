@@ -1,5 +1,7 @@
 class AccountsController < ApplicationController
    before_action :twitter_oAuth, only: [:create]
+   before_action :set_account, only: [:destroy]
+
   def list
   	@accounts = Account.all
   end
@@ -22,16 +24,15 @@ class AccountsController < ApplicationController
       else
         format.html { render :new }
       end
-    #@account = Account.new(account_params)
     end
+  end
 
-
-
-    #   else
-    #     format.html { render :new }
-    #     format.json { render json: @account.errors, status: :unprocessable_entity }
-    #   end
-
+  # DELETE /accounts/1
+  def destroy
+    @account.destroy
+    respond_to do |format|
+      format.html { redirect_to root_url, notice: 'Account was successfully deleted.' }
+    end
   end
 
 
@@ -48,5 +49,9 @@ class AccountsController < ApplicationController
         config.access_token        = "4644992487-ZGV2FSbwYDCBgVyjMoAaoR3rXlUdnAwaCl9SYVE"
         config.access_token_secret = "zbU5FfiibtontJiykO3ZInO4yzUDscByi9HjkOAGKy64G"
       end
+    end
+
+    def set_account
+      @account = Account.find(params[:id])
     end
 end

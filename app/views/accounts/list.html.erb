@@ -5,6 +5,7 @@
     <li>Nome: <%= account.name %></li>
     <li>Followers: <%= account.followers %></li>
     <li>Following: <%= account.following %></li>
+    <%= link_to 'Delete', account, method: :delete, data: { confirm: 'Are you sure?' } %>
     <hr>
   <% end %>
 </ul>
