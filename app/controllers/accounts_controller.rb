@@ -36,6 +36,7 @@ class AccountsController < ApplicationController
     end
   end
 
+  #delayed jobs: http://blog.andolasoft.com/2013/04/4-simple-steps-to-implement-delayed-job-in-rails.html
   def followers
     @cursor = params[:cursor] || -1
     @followers =  @client.get '1.1/followers/list.json', {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor}
