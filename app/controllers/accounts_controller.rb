@@ -1,6 +1,6 @@
 class AccountsController < ApplicationController
-   before_action :twitter_oAuth, only: [:create, :followers]
-   before_action :set_account, only: [:destroy, :followers]
+   before_action :twitter_oAuth, only: [:create, :followers, :friends]
+   before_action :set_account, only: [:destroy, :followers, :friends]
    respond_to :html, :json
 
   def list
@@ -43,6 +43,15 @@ class AccountsController < ApplicationController
     @next = @followers[:next_cursor]
     @followers = @followers[:users]
     respond_with({:followers => @followers, :account => @account, :previous=>@previous,:next=>@next})
+  end
+
+  def friends
+    @cursor = params[:cursor] || -1
+    @friends =  @client.get '1.1/friends/list.json', {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor}
+    @previous = @friends[:previous_cursor] > 0 ? @friends[:previous_cursor] : -1
+    @next = @friends[:next_cursor]
+    @friends = @friends[:users]
+    respond_with({:friends => @friends, :account => @account, :previous=>@previous,:next=>@next})
   end
 
 

@@ -1,0 +1,10 @@
+<h1><%=@account[:name] %> friends list</h1>
+
+<%= link_to 'previous', params.merge(:cursor=> @previous) %>
+<%= link_to 'next', params.merge(:cursor=> @next) %>
+<ul>
+  <% @friends.each do |friend| %>
+    <li>Nome: <%= friend[:name]%></li>
+  <% end %>
+
+</ul>
