@@ -6,6 +6,7 @@
     <li>Followers: <%= account.followers %></li>
     <li>Following: <%= account.following %></li>
     <%= link_to 'Delete', account, method: :delete, data: { confirm: 'Are you sure?' } %>
+    <%= link_to 'Followers', accounts_followers_path({:id=>account}) %>
     <hr>
   <% end %>
 </ul>

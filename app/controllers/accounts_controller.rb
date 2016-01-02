@@ -1,6 +1,7 @@
 class AccountsController < ApplicationController
-   before_action :twitter_oAuth, only: [:create]
-   before_action :set_account, only: [:destroy]
+   before_action :twitter_oAuth, only: [:create, :followers]
+   before_action :set_account, only: [:destroy, :followers]
+   respond_to :html, :json
 
   def list
   	@accounts = Account.all
@@ -35,6 +36,16 @@ class AccountsController < ApplicationController
     end
   end
 
+  def followers
+    @cursor = params[:cursor] || -1
+    @followers =  @client.get '1.1/followers/list.json', {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor}
+    @previous = @followers[:previous_cursor] > 0 ? @followers[:previous_cursor] : -1
+    @next = @followers[:next_cursor]
+    @followers = @followers[:users]
+    respond_with({:followers => @followers, :account => @account, :previous=>@previous,:next=>@next})
+  end
+
+
 
   private
   	# Never trust parameters from the scary internet, only allow the white list through.
@@ -44,10 +55,11 @@ class AccountsController < ApplicationController
 
     def twitter_oAuth
       @client = Twitter::REST::Client.new do |config|
+        #app auth allows for more requests every 15 minutes, possibly remove user key and secret
         config.consumer_key        = "bw6Ibw6DvDWZYTZJDgsIn12II"
         config.consumer_secret     = "lShJQA17tg93RVUCNhHRqAuHOOfSPvYqAJHihKbxT753GukKuJ"
-        config.access_token        = "4644992487-ZGV2FSbwYDCBgVyjMoAaoR3rXlUdnAwaCl9SYVE"
-        config.access_token_secret = "zbU5FfiibtontJiykO3ZInO4yzUDscByi9HjkOAGKy64G"
+        #config.access_token        = "4644992487-ZGV2FSbwYDCBgVyjMoAaoR3rXlUdnAwaCl9SYVE"
+        #config.access_token_secret = "zbU5FfiibtontJiykO3ZInO4yzUDscByi9HjkOAGKy64G"
       end
     end
 

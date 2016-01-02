@@ -3,6 +3,8 @@ Rails.application.routes.draw do
 
   get 'accounts/new'
 
+  get 'accounts/followers'
+
   resources :accounts
 
   # The priority is based upon order of creation: first created -> highest priority.
