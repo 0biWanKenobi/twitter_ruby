@@ -1,10 +1,4 @@
-<h1><%=@account[:name] %> followers list</h1>
 
-<%= link_to 'previous', params.merge(:cursor=> @previous) %>
-<%= link_to 'next', params.merge(:cursor=> @next) %>
-<ul>
-  <% @followers.each do |follower| %>
-    <li>Nome: <%= follower[:name]%></li>
-  <% end %>
 
-</ul>
+<% Rails.cache.fetch (@job_id) %>
+

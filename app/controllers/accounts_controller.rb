@@ -36,19 +36,26 @@ class AccountsController < ApplicationController
     end
   end
 
-  #delayed jobs: http://blog.andolasoft.com/2013/04/4-simple-steps-to-implement-delayed-job-in-rails.html
+  #delayed jobs: http://blog.andolasoft.com/2013/04/4-simple-steps-to-implement-delayed-job-in-rails.html https://www.youtube.com/watch?v=xVW4wRwwfJg
+  # https://infinum.co/the-capsized-eight/articles/progress-bar-in-rails
   def followers
     @cursor = params[:cursor] || -1
-    @followers =  @client.get '1.1/followers/list.json', {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor}
-    @previous = @followers[:previous_cursor] > 0 ? @followers[:previous_cursor] : -1
-    @next = @followers[:next_cursor]
-    @followers = @followers[:users]
-    respond_with({:followers => @followers, :account => @account, :previous=>@previous,:next=>@next})
+    #@account.delay.getFollowers @client, @name, @cursor
+    # @request = Twitter::REST::Request.new(@client, 'get', '1.1/followers/list.json',  {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor})
+    # @followers = @request.perform
+    @job = Delayed::Job.enqueue GetFollowersJob.new(@client, @account[:name], @cursor)
+    # @previous = @followers[:previous_cursor] > 0 ? @followers[:previous_cursor] : -1
+    # @next = @followers[:next_cursor]
+    # @followers = @followers[:users]
+    # respond_with({:followers => @followers, :account => @account, :previous=>@previous,:next=>@next})
+    @job_id = @job.id
+    respond_with({:job_id =>@job_id})
   end
 
   def friends
     @cursor = params[:cursor] || -1
-    @friends =  @client.get '1.1/friends/list.json', {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor}
+    @request = Twitter::REST::Request.new(@client, 'get', '1.1/friends/list.json',  {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor})
+    @friends = @request.delay.perform
     @previous = @friends[:previous_cursor] > 0 ? @friends[:previous_cursor] : -1
     @next = @friends[:next_cursor]
     @friends = @friends[:users]

@@ -44,3 +44,9 @@ gem 'coffee-script-source', '1.8.0'
 
 # Twitter gem
 gem 'twitter', '5.15.0'
+
+#Active job gem
+gem 'delayed_job_active_record'
+
+#memcached gem
+gem 'dalli'
