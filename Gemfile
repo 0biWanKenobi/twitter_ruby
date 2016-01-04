@@ -50,3 +50,6 @@ gem 'delayed_job_active_record'
 
 #memcached gem
 gem 'dalli'
+
+#pusher gem
+gem 'pusher'

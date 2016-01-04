@@ -1,7 +1,8 @@
 class AccountsController < ApplicationController
-   before_action :twitter_oAuth, only: [:create, :followers, :friends]
-   before_action :set_account, only: [:destroy, :followers, :friends]
-   respond_to :html, :json
+
+  before_action :twitter_oAuth, only: [:create, :followers, :friends]
+  before_action :set_account, only: [:destroy, :followers, :friends]
+  respond_to :html, :json
 
   def list
   	@accounts = Account.all
@@ -13,15 +14,17 @@ class AccountsController < ApplicationController
 
   # POST /accounts
   def create
-    data =  @client.get '1.1/users/show.json', {:screen_name=>params[:account][:name]}
-    params[:account][:followers] = data[:followers_count]
-    params[:account][:following] = data[:friends_count]
+    # data =  @client.get '1.1/users/show.json', {:screen_name=>params[:account][:name]}
+    # params[:account][:followers] = data[:followers_count]
+    # params[:account][:following] = data[:friends_count]
 
     @account = Account.new(account_params)
 
     respond_to do |format|
       if @account.save
-        format.html { redirect_to root_url, notice: 'account '+params[:account][:name]+' added, has '+params[:account][:followers].to_s+' followers and follows '+params[:account][:following].to_s+' people'}
+        format.html { redirect_to root_url, notice: 'account '+params[:account][:name]+' added'}
+        Delayed::Job.enqueue GetFollowersAndFriendsNumberJob.new(@client, params[:account][:name], @account.id)
+        
       else
         format.html { render :new }
       end
@@ -44,11 +47,12 @@ class AccountsController < ApplicationController
     # @request = Twitter::REST::Request.new(@client, 'get', '1.1/followers/list.json',  {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor})
     # @followers = @request.perform
     @job = Delayed::Job.enqueue GetFollowersJob.new(@client, @account[:name], @cursor)
+    @job_id = @job.id
     # @previous = @followers[:previous_cursor] > 0 ? @followers[:previous_cursor] : -1
     # @next = @followers[:next_cursor]
     # @followers = @followers[:users]
     # respond_with({:followers => @followers, :account => @account, :previous=>@previous,:next=>@next})
-    @job_id = @job.id
+    
     respond_with({:job_id =>@job_id})
   end
 
