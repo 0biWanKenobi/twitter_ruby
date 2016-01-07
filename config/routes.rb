@@ -5,9 +5,19 @@ Rails.application.routes.draw do
 
   get 'accounts/followers'
 
+  post 'accounts/followers'
+
+  # post 'accounts/followers_list' => 'accounts#getsavedfollowers'
+
   get 'accounts/friends'
 
   resources :accounts
+  #  do
+  #   member do
+  #     post 'getsavedfollowers'
+  #   end
+  # end 
+
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

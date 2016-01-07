@@ -1,25 +1,20 @@
-class GetFollowersAndFriendsNumberJob < Struct.new(:client, :name, :id)
+class GetFollowersAndFriendsNumberJob < Struct.new(:account)
 
   def perform
-    @request = Twitter::REST::Request.new(client, 'get', '1.1/users/show.json', {:screen_name=>name})
-    @info = @request.perform
-    @account = Account.find(id)
-    @account.update_attributes({:followers=>@info[:followers_count], :following=>@info[:friends_count]})     
-  rescue Twitter::Error::TooManyRequests => error
-    puts "Rate limit error, rescheduling after #{error.rate_limit.reset_in} seconds...".color(:yellow)
-    @time_before_retry =  error.rate_limit.reset_in
+    account.update_stats
   end
 
-  def after (job)
+  def success (job)
     Pusher.trigger('create_user', 'success', {
-      name: @account[:name],
-      followers: @account[:followers],
-      friends: @account[:following]
+      name: account[:name],
+      followers: account[:followers],
+      friends: account[:following]
     })
   end
 
   def error(job, exception)
     @exception = exception
+    puts ""
   end
 
   def reschedule_at(current_time, attempts)

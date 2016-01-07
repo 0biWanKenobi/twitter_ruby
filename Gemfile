@@ -53,3 +53,6 @@ gem 'dalli'
 
 #pusher gem
 gem 'pusher'
+
+#pagination gem
+gem 'kaminari'

@@ -1,12 +1,12 @@
-class GetFollowersJob < Struct.new(:account)
+class GetFriendsJob < Struct.new(:account)
 
   def perform
-    @last_loop = account.get_followers
+    @last_loop = account.get_friends
     @last_loop+=1
   end
 
   def success (job)
-    Pusher.trigger('load_followers', 'update', { percentage: 100, cursor: @last_loop, name: account[:name], id: account.id })
+    Pusher.trigger('load_friends', 'update', { percentage: 100, cursor: @last_loop, name: account[:name], id: account.id })
   end
 
    def error(job, exception)

@@ -1,8 +1,7 @@
 class AccountsController < ApplicationController
-
-  before_action :twitter_oAuth, only: [:create, :followers, :friends]
-  before_action :set_account, only: [:destroy, :followers, :friends]
-  respond_to :html, :json
+  skip_before_action :verify_authenticity_token,  only: [:list]
+  before_action :set_account, only: [:destroy, :followers, :friends, :getsavedfollowers]
+  respond_to :html, :json, :js
 
   def list
   	@accounts = Account.all
@@ -23,8 +22,7 @@ class AccountsController < ApplicationController
     respond_to do |format|
       if @account.save
         format.html { redirect_to root_url, notice: 'account '+params[:account][:name]+' added'}
-        Delayed::Job.enqueue GetFollowersAndFriendsNumberJob.new(@client, params[:account][:name], @account.id)
-        
+        Delayed::Job.enqueue GetFollowersAndFriendsNumberJob.new(@account)
       else
         format.html { render :new }
       end
@@ -39,31 +37,53 @@ class AccountsController < ApplicationController
     end
   end
 
-  #delayed jobs: http://blog.andolasoft.com/2013/04/4-simple-steps-to-implement-delayed-job-in-rails.html https://www.youtube.com/watch?v=xVW4wRwwfJg
-  # https://infinum.co/the-capsized-eight/articles/progress-bar-in-rails
-  def followers
-    @cursor = params[:cursor] || -1
-    #@account.delay.getFollowers @client, @name, @cursor
-    # @request = Twitter::REST::Request.new(@client, 'get', '1.1/followers/list.json',  {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor})
-    # @followers = @request.perform
-    @job = Delayed::Job.enqueue GetFollowersJob.new(@client, @account[:name], @cursor)
-    @job_id = @job.id
-    # @previous = @followers[:previous_cursor] > 0 ? @followers[:previous_cursor] : -1
-    # @next = @followers[:next_cursor]
-    # @followers = @followers[:users]
-    # respond_with({:followers => @followers, :account => @account, :previous=>@previous,:next=>@next})
-    
-    respond_with({:job_id =>@job_id})
+
+
+  # def getsavedfollowers
+  #   respond_to do |format|
+  #     puts params
+  #     @followers = Followers.where("twitter_id = '%s'", params[:data][:name]).order(:follower).page(params[:data][:cursor])
+  #     # format.json {render json:  @followers.as_json             }
+  #     format.json {render :json => {:data =>@followers.as_json , :attachmentPartial => render_to_string('accounts/_update_pagination.js', :layout => false, :locals => { :followers => @followers }) }}
+  #   end
+  # end
+
+  def getsavedfriends
+    respond_to do |format|
+      puts params
+      @friends = Friends.where("twitter_id = '%s'", params[:data][:name]).order(:friend).page(params[:data][:cursor])
+      format.json {render json: @friends.as_json}
+    end
+  end
+
+
+  def followers #possibly move code to model passing params to a model function
+    @followers = Followers.get_by(@account[:name],params[:page])
+    if params[:update] == nil && @followers.any?
+      
+      # puts "\e[32mFollowers found in db!\e[0m"
+      respond_to do |format|
+        format.html { render 'followers', :locals =>{:followers => @followers} }
+        format.json {render :json => {:data =>@followers.as_json , :attachmentPartial => render_to_string('accounts/_update_pagination.js', :layout => false, :locals => { :followers => @followers }) }}
+      end
+    elsif params[:update]
+      # puts "\e[32mFetching followers\e[0m"
+      Delayed::Job.enqueue GetFollowersJob.new(@account)    
+      respond_to do |format|
+        format.html {render :nothing => true}      #avoid internal server error caused by @followers not being defined in view
+      end
+    else #safety case, should never be reached because view always asks for specific page and this would be called when there are no followers on that db page
+      respond_to do |format|
+        format.json {render :json => {:data =>{} , :attachmentPartial => render_to_string('accounts/_update_pagination.js', :layout => false, :locals => { :followers => @followers }) }}
+      end
+    end
   end
 
   def friends
-    @cursor = params[:cursor] || -1
-    @request = Twitter::REST::Request.new(@client, 'get', '1.1/friends/list.json',  {:screen_name=>@account[:name], :count=>200, :skip_status=> true, :include_user_entities=>false, :cursor=>@cursor})
-    @friends = @request.delay.perform
-    @previous = @friends[:previous_cursor] > 0 ? @friends[:previous_cursor] : -1
-    @next = @friends[:next_cursor]
-    @friends = @friends[:users]
-    respond_with({:friends => @friends, :account => @account, :previous=>@previous,:next=>@next})
+    Delayed::Job.enqueue GetFriendsJob.new(@account)    
+    respond_to do |format|
+      format.html {render "friends"}      
+    end
   end
 
 
@@ -74,17 +94,9 @@ class AccountsController < ApplicationController
 	    params.require(:account).permit(:name, :followers, :following)
   	end
 
-    def twitter_oAuth
-      @client = Twitter::REST::Client.new do |config|
-        #app auth allows for more requests every 15 minutes, possibly remove user key and secret
-        config.consumer_key        = "bw6Ibw6DvDWZYTZJDgsIn12II"
-        config.consumer_secret     = "lShJQA17tg93RVUCNhHRqAuHOOfSPvYqAJHihKbxT753GukKuJ"
-        #config.access_token        = "4644992487-ZGV2FSbwYDCBgVyjMoAaoR3rXlUdnAwaCl9SYVE"
-        #config.access_token_secret = "zbU5FfiibtontJiykO3ZInO4yzUDscByi9HjkOAGKy64G"
-      end
-    end
-
     def set_account
-      @account = Account.find(params[:id])
+      id = params[:id]
+      @account = Account.find(id)
+
     end
 end

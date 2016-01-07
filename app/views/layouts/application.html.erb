@@ -2,14 +2,14 @@
 <html>
 <head>
   <title>Twitter</title>
-  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-  <%= yield(:header) %>
+  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %> 
   <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <%= yield(:header) %>
   <%= csrf_meta_tags %>
 </head>
 <body>
 
 <%= yield %>
-
+<%= render partial: 'followers.html.erb', locals: { action_url: accounts_followers_path } %>
 </body>
 </html>
