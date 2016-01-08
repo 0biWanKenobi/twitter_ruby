@@ -5,7 +5,7 @@ class Account < ActiveRecord::Base
 	validates :name, uniqueness: true
 
   def followers
-    read_attribute(:followers) || 'fetching'
+    read_attribute(:followers_num) || 'fetching'
   end
 
   def friends
@@ -15,13 +15,12 @@ class Account < ActiveRecord::Base
   def update_stats
     @request = Twitter::REST::Request.new(@@client, 'get', '1.1/users/show.json', {:screen_name=>read_attribute(:name)} )
     @info = @request.perform
-    update_attributes({:followers=>@info[:followers_count], :following=>@info[:friends_count]})
-
+    update_attributes({:followers_num=>@info[:followers_count], :following=>@info[:friends_count]})  
   end
 
 
   def get_followers
-    @loops = get_relation(Followers, 'followers', :follower, :followers)
+    @loops = get_relation(Followers, 'followers', :follower, :followers_num)
   end
 
   def get_friends

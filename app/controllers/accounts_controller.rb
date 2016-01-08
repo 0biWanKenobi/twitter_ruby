@@ -13,15 +13,12 @@ class AccountsController < ApplicationController
 
   # POST /accounts
   def create
-    # data =  @client.get '1.1/users/show.json', {:screen_name=>params[:account][:name]}
-    # params[:account][:followers] = data[:followers_count]
-    # params[:account][:following] = data[:friends_count]
 
     @account = Account.new(account_params)
 
     respond_to do |format|
       if @account.save
-        format.html { redirect_to root_url, notice: 'account '+params[:account][:name]+' added'}
+        format.html { redirect_to root_url, notice: 'Processing account '+params[:account][:name]}
         Delayed::Job.enqueue GetFollowersAndFriendsNumberJob.new(@account)
       else
         format.html { render :new }

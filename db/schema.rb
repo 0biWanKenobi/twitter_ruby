@@ -11,14 +11,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160105231407) do
+ActiveRecord::Schema.define(version: 20160108215142) do
 
   create_table "accounts", force: true do |t|
     t.string   "name"
-    t.integer  "followers"
+    t.integer  "followers_num"
     t.integer  "following"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "is_valid",      default: false
   end
 
   create_table "delayed_jobs", force: true do |t|

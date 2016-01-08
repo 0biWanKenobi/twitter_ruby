@@ -2,14 +2,25 @@ class GetFollowersAndFriendsNumberJob < Struct.new(:account)
 
   def perform
     account.update_stats
+    @success = true
+  rescue Twitter::Error::NotFound => e
+    @success = false
+    Pusher.trigger('create_user', 'not_found',{:name => account[:name]})
+    account.destroy
+    puts "exception rescued"
+    
   end
 
   def success (job)
-    Pusher.trigger('create_user', 'success', {
-      name: account[:name],
-      followers: account[:followers],
-      friends: account[:following]
-    })
+    if @success
+      account.is_valid = true
+      account.save
+      Pusher.trigger('create_user', 'success', {
+        name: account[:name],
+        followers: account[:followers_num],
+        friends: account[:following]
+      })
+    end
   end
 
   def error(job, exception)
