@@ -15,16 +15,18 @@ class GetFriendsJob < Struct.new(:account)
 
   def reschedule_at(current_time, attempts)
     if at_rate_limit?
-      puts "reschedule at "+@exception.rate_limit.reset_at.to_s
-      puts "default reschedule would be at "+(current_time + 5.seconds**attempts).to_s
       @exception.rate_limit.reset_at
+      alt_format = @exception.rate_limit.reset_in + current_time
+      puts "reschedule at "+@exception.rate_limit.reset_at.to_s      
+      puts "reschedule at, alternative format "+alt_format.to_s
+      puts "default reschedule would be at "+(current_time + 5.seconds**attempts).to_s      
     else #default behaviour
       current_time + 5.seconds**attempts
     end
   end
 
   def queue_name
-    'create_user'
+    'get_friends'
   end
 
   private

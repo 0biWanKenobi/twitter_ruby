@@ -25,7 +25,7 @@ class Account < ActiveRecord::Base
   end
 
   def get_friends
-    get_relation(Friends, 'friends', :friend, :friends)
+    get_relation(Friends, 'friends', :friend, :following)
   end
 
   private
@@ -41,15 +41,14 @@ class Account < ActiveRecord::Base
 
       cursor = @relation[:next_cursor]
 
-      if cursor != 0
-
-        @relation = @relation[:users]
-        @relation.each do |f|
-          params = {:twitter_id=>read_attribute(:name), symbol=>f[:name]}
-          if !model.where(params).any?
-            model.new(params).save
-          end
+      @relation = @relation[:users]
+      @relation.each do |f|
+        params = {:twitter_id=>read_attribute(:name), symbol=>f[:name]}
+        if !model.where(params).any?
+          model.new(params).save
         end
+      end
+      if cursor != 0
         loops+=1
         percentage = (batch_size*100*loops) / read_attribute(symbols)
         Pusher.trigger('load_'+breadcrumb, 'update', {percentage: percentage, cursor:loops, name:name, id: id})

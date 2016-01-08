@@ -1,10 +1,25 @@
+<% content_for(:header) do 
+     javascript_include_tag "https://js.pusher.com/3.0/pusher.min.js", "pusher_friends.js", "data-turbolinks-track" => true
+   end %>
+
+
+<%= form_tag(accounts_friends_path({:id=>@account.id, :update=>true}), remote: true) do
+
+  submit_tag('Update')
+
+end %>
+
+
 <h1><%=@account[:name] %> friends list</h1>
 
-<%= link_to 'previous', params.merge(:cursor=> @previous) %>
-<%= link_to 'next', params.merge(:cursor=> @next) %>
-<ul>
+
+
+<div id="paginator" data-page=<%=page%>>
+<%= paginate @friends %>
+</div>
+<ul id="friends_list">
   <% @friends.each do |friend| %>
-    <li>Nome: <%= friend[:name]%></li>
+    <li>Nome: <%= friend[:friend]%></li>
   <% end %>
 
 </ul>

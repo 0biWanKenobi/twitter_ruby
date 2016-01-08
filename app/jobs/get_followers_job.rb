@@ -24,7 +24,7 @@ class GetFollowersJob < Struct.new(:account)
   end
 
   def queue_name
-    'create_user'
+    'get_followers'
   end
 
   private

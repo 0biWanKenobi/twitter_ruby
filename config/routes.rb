@@ -11,6 +11,12 @@ Rails.application.routes.draw do
 
   get 'accounts/friends'
 
+  post 'accounts/friends'
+
+  post 'accounts/pagination_followers'
+
+  post 'accounts/pagination_friends'
+
   resources :accounts
   #  do
   #   member do
