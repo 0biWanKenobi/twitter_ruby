@@ -1,5 +1,5 @@
 class Account < ActiveRecord::Base
-  has_many :followers
+  # has_many :followers
   has_many :friends
 	validates :name, presence: true
 	validates :name, uniqueness: true
@@ -43,9 +43,10 @@ class Account < ActiveRecord::Base
       @relation = @relation[:users]
       @relation.each do |f|
         params = {:twitter_id=>read_attribute(:name), symbol=>f[:name]}
-        if !model.where(params).any?
-          model.new(params).save
-        end
+        model.new(params).save
+        # if !model.where(params).any?
+          
+        # end
       end
       if cursor != 0
         loops+=1

@@ -7,6 +7,7 @@
 
       console.log(data)
       var mydata = {page: data.cursor, id: data.id }
+
       // Should only ask back for the data relevant to the current pagination
       var page = $('#paginator').attr('data-page')
       page = + page.replace(/,/g, '');
@@ -20,10 +21,10 @@
      		complete: function() {},
        	success: function(data, textStatus, xhr) {
                   
-                  console.log(data['data'])                  
+                  console.log(data)                  
                   $('#followers_list').empty();
-                  for(var i=0; i<data['data'].length; i++){
-                    $('#followers_list').append("<li id='cursor"+mydata.page+" "+i+"'>"+data['data'][i].follower+"</li>")
+                  for(var i=0; i<data.length; i++){
+                    $('#followers_list').append("<li id='cursor"+mydata.page+" "+i+"'>"+data[i].follower+"</li>")
                   }  
                 },
          error: function(r, e) {

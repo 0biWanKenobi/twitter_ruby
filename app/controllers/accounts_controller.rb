@@ -40,8 +40,8 @@ class AccountsController < ApplicationController
     @followers = Followers.get_by(@account[:name],params[:page])
     if params[:update] == nil && followers_in_db = @followers.any?
       respond_to do |format|
-        format.html { render 'followers', :locals =>{:followers => @followers} }
-        format.json {render :json => followers.as_json}
+        format.html { render 'followers', :locals =>{:followers => @followers, :page =>params[:page]} }
+        format.json {render :json => @followers.as_json}
       end
     elsif params[:update] || !followers_in_db
       Delayed::Job.enqueue GetFollowersJob.new(@account)    
@@ -71,7 +71,7 @@ class AccountsController < ApplicationController
   def pagination_followers
     @followers = Followers.get_by(@account[:name],params[:page])
     respond_to do |format|
-      format.json {render :json => render_to_string('accounts/_update_pagination.js', :layout => false, :locals => { :relation => @followers, :action => 'followers' })}      
+      format.json {render :json => {:pagination =>render_to_string('accounts/_update_pagination.js', :layout => false, :locals => { :relation => @followers, :action => 'followers' }) } }      
     end
   end
 

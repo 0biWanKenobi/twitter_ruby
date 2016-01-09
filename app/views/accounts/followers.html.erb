@@ -9,7 +9,10 @@
   submit_tag('Update')
 
 end %>
-<div id="paginator">
+
+<h1><%=@account[:name] %> followers list</h1>
+
+<div id="paginator" data-page=<%=page %>>
 <%= paginate @followers %>
 </div>
 <%= 
