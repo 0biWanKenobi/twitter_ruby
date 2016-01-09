@@ -46,7 +46,7 @@ class AccountsController < ApplicationController
     elsif params[:update] || !followers_in_db
       Delayed::Job.enqueue GetFollowersJob.new(@account)    
       respond_to do |format|
-        format.html {render 'followers', :locals =>{:page => params[:page]}}      #avoid internal server error caused by @followers not being defined in view
+        format.html {render 'followers', :locals =>{:page => params[:page]}}    
       end
     end
   end
