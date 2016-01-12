@@ -37,48 +37,48 @@ class AccountsController < ApplicationController
 
 
   def followers #possibly move code to model passing params to a model function
-    @followers = Followers.get_by(@account[:name],params[:page])
+    @followers = @account.followers.page params[:page]
     if params[:update] == nil && followers_in_db = @followers.any?
       respond_to do |format|
-        format.html { render 'followers', :locals =>{:followers => @followers, :page =>params[:page]} }
-        format.json {render :json => @followers.as_json}
+        format.html { render 'followers', locals:{followers: @followers, page:params[:page]} }
+        format.json {render json: @followers.as_json}
       end
     elsif params[:update] || !followers_in_db
       Delayed::Job.enqueue GetFollowersJob.new(@account)    
       respond_to do |format|
-        format.html {render 'followers', :locals =>{:page => params[:page]}}    
+        format.html {render 'followers', locals:{page: params[:page]}}    
       end
     end
   end
 
   def friends
-    @friends = Friends.get_by(@account[:name],params[:page])
+    @friends = @account.friends.page params[:page]
     if params[:update] == nil && friends_in_db = @friends.any?
       puts "friends in db" 
       respond_to do |format|
-        format.html { render 'friends', :locals =>{:friends => @friends, :page =>params[:page]} }
-        format.json {render :json => @friends.as_json}
+        format.html { render 'friends', locals:{friends: @friends, page:params[:page]} }
+        format.json {render json: @friends.as_json}
       end
     elsif params[:update] || !friends_in_db
       puts "job started"
       Delayed::Job.enqueue GetFriendsJob.new(@account)   
       respond_to do |format|
-        format.html {render 'friends', :locals =>{:page => params[:page]}}     
+        format.html {render 'friends', locals:{page: params[:page]}}     
       end
     end
   end
 
   def pagination_followers
-    @followers = Followers.get_by(@account[:name],params[:page])
+    @followers = @account.followers.page params[:page]
     respond_to do |format|
-      format.json {render :json => {:pagination =>render_to_string('accounts/_update_pagination.js', :layout => false, :locals => { :relation => @followers, :action => 'followers' }) } }      
+      format.json {render json: {pagination:render_to_string('accounts/_update_pagination.js', layout: false, locals: { relation: @followers, action: 'followers' }) } }      
     end
   end
 
   def pagination_friends
-    @friends = Friends.get_by(@account[:name])
+    @friends = @account.friends.page params[:page]
     respond_to do |format|
-      format.json {render :json => {:pagination => render_to_string('accounts/_update_pagination.js', :layout => false, :locals => { :relation => @friends, :action => 'friends' })  } }      
+      format.json {render json: {pagination: render_to_string('accounts/_update_pagination.js', layout: false, locals: { relation: @friends, action: 'friends' })  } }      
     end
   end
 

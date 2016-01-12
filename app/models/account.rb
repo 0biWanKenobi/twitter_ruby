@@ -1,63 +1,53 @@
 class Account < ActiveRecord::Base
-  has_many :followers
-  has_many :friends
+  has_many :followers, dependent: :destroy
+  has_many :friends, dependent: :destroy
 	validates :name, presence: true
 	validates :name, uniqueness: true
 
-  def followers
-    read_attribute(:followers_num) || 'fetching'
-  end
-
-  def friends
-    read_attribute(:following) || 'fetching'
-  end
 
   def update_stats
-    @request = Twitter::REST::Request.new(@@client, 'get', '1.1/users/show.json', {:screen_name=>read_attribute(:name)} )
-    @info = @request.perform
-    update_attributes({:followers_num=>@info[:followers_count], :following=>@info[:friends_count]})  
+    @info = @@client.user(name)
+    update_attributes({twitter_id: @info.id, followers_num: @info.followers_count, following: @info.friends_count})  
   end
 
 
   def get_followers
-    @loops = get_relation(Followers, 'followers', :follower, :followers_num)
+    params = {:skip_status=> true, :include_user_entities=>false}
+    @cursor = @@client.followers(twitter_id, params)
+    count = 0
+    loops = 0
+    @cursor.each do |f|
+      self.followers.new(follower: f.name).save
+      count+=1
+      if count == 200
+        count = 0
+        loops+=1
+        percentage = (200*100*loops) / followers_num
+        Pusher.trigger('load_followers', 'update', {percentage: percentage, cursor:loops, name:name, id: id})
+      end
+    end 
+    return loops
   end
 
   def get_friends
-    get_relation(Friends, 'friends', :friend, :following)
+    params = {:skip_status=> true, :include_user_entities=>false}
+    @cursor = @@client.friends(twitter_id, params)
+    count = 0
+    loops = 0
+    @cursor.each do |f|
+      self.friends.new(friend: f.name).save
+      count+=1
+      if count == 200
+        count = 0
+        loops+=1
+        percentage = (200*100*loops) / following
+        Pusher.trigger('load_friends', 'update', {percentage: percentage, cursor:loops, name:name, id: id})
+      end
+    end 
+    return loops
   end
 
   private
-
-
-  def get_relation (model, breadcrumb, symbol, symbols)
-    cursor = -1
-    loops = 0
-    batch_size = 200
-    while true do
-      @request = Twitter::REST::Request.new(@@client, 'get', '1.1/'+breadcrumb+'/list.json',  {:screen_name=>read_attribute(:name), :count=>batch_size, :skip_status=> true, :include_user_entities=>false, :cursor=>cursor})
-      @relation = @request.perform
-
-      cursor = @relation[:next_cursor]
-
-      @relation = @relation[:users]
-      @relation.each do |f|
-        params = {:twitter_id=>read_attribute(:name), symbol=>f[:name]}
-        model.new(params).save
-        # if !model.where(params).any?
-          
-        # end
-      end
-      if cursor != 0
-        loops+=1
-        percentage = (batch_size*100*loops) / read_attribute(symbols)
-        Pusher.trigger('load_'+breadcrumb, 'update', {percentage: percentage, cursor:loops, name:name, id: id})
-      else 
-        break
-      end
-    end
-    return loops
-  end
 
   @@client = Twitter::REST::Client.new do |config|
     #app auth allows for more requests every 15 minutes, possibly remove user key and secret

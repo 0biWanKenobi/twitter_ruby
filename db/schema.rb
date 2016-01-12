@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160108215142) do
+ActiveRecord::Schema.define(version: 20160112150843) do
 
   create_table "accounts", force: true do |t|
     t.string   "name"
@@ -20,6 +20,7 @@ ActiveRecord::Schema.define(version: 20160108215142) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "is_valid",      default: false
+    t.integer  "twitter_id",    default: 0
   end
 
   create_table "delayed_jobs", force: true do |t|
@@ -39,14 +40,14 @@ ActiveRecord::Schema.define(version: 20160108215142) do
   add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority"
 
   create_table "followers", force: true do |t|
-    t.string   "twitter_id"
+    t.string   "account_id"
     t.string   "follower"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
 
   create_table "friends", force: true do |t|
-    t.string   "twitter_id"
+    t.string   "account_id"
     t.string   "friend"
     t.datetime "created_at"
     t.datetime "updated_at"

@@ -10,8 +10,8 @@
       <%="class=hidden"%> 
     <%end%> >
     <li>Nome: <%= account.name %></li>
-    <li>Followers:  <%=content_tag(:span, account.followers, id: 'followers_'+account.name)  %></li>
-    <li>Friends: <%=content_tag(:span, account.friends, id: 'friends_'+account.name)  %></li>
+    <li>Followers:  <%=content_tag(:span, account[:followers_num], id: 'followers_'+account.name)  %></li>
+    <li>Friends: <%=content_tag(:span, account[:following], id: 'friends_'+account.name)  %></li>
     <%= link_to 'Delete', account, method: :delete, data: { confirm: 'Are you sure?' } %>
     <%= link_to 'Followers', accounts_followers_path({:id=>account, :page=>1}), data: { no_turbolink: true }  %>
     <%= link_to 'Friends', accounts_friends_path({:id=>account, :page=>1}), data: { no_turbolink: true } %>

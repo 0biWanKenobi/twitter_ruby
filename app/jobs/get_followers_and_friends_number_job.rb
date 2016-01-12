@@ -5,7 +5,7 @@ class GetFollowersAndFriendsNumberJob < Struct.new(:account)
     @success = true
   rescue Twitter::Error::NotFound => e
     @success = false
-    Pusher.trigger('create_user', 'not_found',{:name => account[:name]})
+    Pusher.trigger('create_user', 'not_found',{name: account[:name]})
     account.destroy
     puts "exception rescued"
     
